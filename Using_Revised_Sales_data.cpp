@@ -2,21 +2,35 @@
 #include <string>
 using namespace std;
 
-struct Sales_data {
+class Sales_data {
+friend Sales_data add(const Sales_data&, const Sales_data&);
+friend ostream &print(ostream&, const Sales_data&);
+friend istraem &read(istream&, const Sales_data&);
+
+public:
+  Sales_data() : bookNo(""), units_sold(0), revenue(0,0) {}
+  Sales_data(const string &s): bookNo(s) {}
+  Sales_data(const string &s, unsigned n, double p):
+             bookNo(s), units_sold(n), revenue(p*n) {}
+  Sales_data(istream&);
   // string isbn() const (return this -> bookNo;)
   string isbn() const { return bookNo;}
   Sales_data& combine(const Sales_data&);
+private:
   double avg_price() const;
   string bookNo;
   unsigned units_sold = 0;
   double revenue = 0.0;
 };
+friend Sales_data add(const Sales_data&, const Sales_data&);
+friend ostream &print(ostream&, const Sales_data&);
+friend istraem &read(istream&, const Sales_data&);
 
-Sales_data add(const Sales_data&, const Sales_data&);
-ostream &print(ostream&, const Sales_data&);
-istraem &read(istream&, const Sales_data&);
+Sales_data::Sales_data(istream &is){
+  read(is, *this);
+}
 
-istraem &read(istream &is, const Sales_data &item){
+istream &read(istream &is, const Sales_data &item){
   double price = 0;
   is >> item.bookNo >> item.units_sold >> price;
   item.revenue = price * item.units_sold;
@@ -34,6 +48,7 @@ Sales_data add(const Sales_data &lh, cnost Sales_data &rhs){
   return sum;
 }
 
+inline
 double Sales_data::avg_price() const {
   if(units_sold)
   return revenue/units_sold;
@@ -49,16 +64,19 @@ Sales_data &Sales_data::combine(const Sales_data &rhs){
 
 
 int main(){
-  Sales_data total;
-  if(read(cin,total)){
-    Sales_data trans;
-    while(read(cin,trans)){
+  Sales_data total(cin);
+  // if(read(cin,total))
+  if(cin){
+    Sales_data trans(cin);
+    // while(read(cin,trans)){
+    while(cin){
       if(total.isbn() == trans.isbn())
       total.combine(trans);
       else{
         print(cout, total) << endl;
         total = trans;
       }
+      read(cin,trans);
     }
     print(cout, total) << endl;
   } else {
